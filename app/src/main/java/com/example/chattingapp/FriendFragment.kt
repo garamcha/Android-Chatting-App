@@ -69,26 +69,37 @@ class FriendFragment:Fragment() {
         }
 */
         recyclerView = binding.friendRecy
-        val dataList = ArrayList<Profile>()
+        val dataList = ArrayList<ProfileData>()
         profileAdapter = ProfileAdapter(dataList)
         recyclerView.adapter = profileAdapter
 
-        dataList.add(Profile(R.drawable.ic_friend, "Ramy"))
-        dataList.add(Profile(R.drawable.ic_friend, "Choi"))
-        dataList.add(Profile(R.drawable.ic_friend, "James"))
-        dataList.add(Profile(R.drawable.ic_friend, "David"))
-        dataList.add(Profile(R.drawable.ic_friend, "Ramy"))
-        dataList.add(Profile(R.drawable.ic_friend, "Choi"))
-        dataList.add(Profile(R.drawable.ic_friend, "James"))
-        dataList.add(Profile(R.drawable.ic_friend, "David"))
-        dataList.add(Profile(R.drawable.ic_friend, "Ramy"))
-        dataList.add(Profile(R.drawable.ic_friend, "Choi"))
-        dataList.add(Profile(R.drawable.ic_friend, "James"))
-        dataList.add(Profile(R.drawable.ic_friend, "David"))
-        dataList.add(Profile(R.drawable.ic_friend, "Ramy"))
-        dataList.add(Profile(R.drawable.ic_friend, "Choi"))
-        dataList.add(Profile(R.drawable.ic_friend, "James"))
-        dataList.add(Profile(R.drawable.ic_friend, "David"))
+        profileAdapter.setOnItemClickListener(object : ProfileAdapter.OnItemClickListener{
+            override fun onClick(v: View, data: ProfileData, position: Int) {
+                // 클릭 시 실행할 행동 입력
+                Intent(activity, ProfileDetailActivity::class.java).apply {
+                    putExtra("data", data)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) //액티비티가 다른 애플리케이션과 독립적으로 실행되도록 보장
+                }.run { startActivity(this) } //현재 액티비티의 컨텍스트에서 다른 액티비티를 시작
+            }
+
+        })
+
+        dataList.add(ProfileData(R.drawable.ic_friend, "Ramy"))
+        dataList.add(ProfileData(R.drawable.ic_friend, "Choi"))
+        dataList.add(ProfileData(R.drawable.ic_friend, "James"))
+        dataList.add(ProfileData(R.drawable.ic_friend, "David"))
+        dataList.add(ProfileData(R.drawable.ic_friend, "Ramy"))
+        dataList.add(ProfileData(R.drawable.ic_friend, "Choi"))
+        dataList.add(ProfileData(R.drawable.ic_friend, "James"))
+        dataList.add(ProfileData(R.drawable.ic_friend, "David"))
+        dataList.add(ProfileData(R.drawable.ic_friend, "Ramy"))
+        dataList.add(ProfileData(R.drawable.ic_friend, "Choi"))
+        dataList.add(ProfileData(R.drawable.ic_friend, "James"))
+        dataList.add(ProfileData(R.drawable.ic_friend, "David"))
+        dataList.add(ProfileData(R.drawable.ic_friend, "Ramy"))
+        dataList.add(ProfileData(R.drawable.ic_friend, "Choi"))
+        dataList.add(ProfileData(R.drawable.ic_friend, "James"))
+        dataList.add(ProfileData(R.drawable.ic_friend, "David"))
 
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
