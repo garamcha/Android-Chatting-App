@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/light_purple"
+    tools:context=".SignUpActivity">
+
+    <!--회원가입 이름 입력-->
+
+    <TextView
+        android:id="@+id/name_tv"
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:text="이름"
+        android:textSize="15dp"
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toTopOf="@+id/name_et"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+    <EditText
+        android:id="@+id/name_et"
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="150dp"
+        android:hint="이름 입력"
+        android:inputType="textPersonName"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!--회원가입 아이디 입력-->
+    <TextView
+        android:id="@+id/email_tv"
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:text="아이디"
+        android:textSize="15dp"
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toTopOf="@+id/email_et"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+    <EditText
+        android:id="@+id/email_et"
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:hint="이메일 입력"
+        android:inputType="textEmailAddress"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/name_et" />
+
+    <!--회원가입 비밀번호 입력-->
+    <TextView
+        android:id="@+id/pwd_tv"
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:text="비밀번호"
+        android:textSize="15dp"
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toTopOf="@+id/pwd_et"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+    <EditText
+        android:id="@+id/pwd_et"
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:hint="비밀번호 입력"
+        android:inputType="textPassword"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/email_et" />
+
+    <!--회원가입 비밀번호 확인-->
+    <TextView
+        android:id="@+id/pwdCheck_tv"
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:text="비밀번호 확인"
+        android:textSize="15dp"
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toTopOf="@+id/pwdCheck_et"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+    <EditText
+        android:id="@+id/pwdCheck_et"
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:hint="비밀번호 확인"
+        android:inputType="textPassword"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/pwd_et" />
+
+    <!--회원가입 버튼-->
+    <Button
+        android:id="@+id/signUpBtn"
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:text="Sign Up"
+        app:layout_constraintTop_toBottomOf="@+id/pwdCheck_et"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

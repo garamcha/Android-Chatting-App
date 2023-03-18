@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_friend"
+        android:title="친구"
+        android:icon="@drawable/ic_friend"
+        />
+    <item
+        android:id="@+id/menu_list"
+        android:title="채팅방"
+        android:icon="@drawable/ic_list"
+        />
+    <item
+        android:id="@+id/menu_setting"
+        android:title="설정"
+        android:icon="@drawable/ic_setting"
+        />
+
+</menu>
