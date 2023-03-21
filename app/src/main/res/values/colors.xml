@@ -12,5 +12,5 @@
     <color name="main_purple">#FF8708BE</color>
     <color name="dark_purple">#FF4F0080</color>
     <color name="yellow">#FFFFCD17</color>
-    <color name="transparent">#00000000</color>
+    <color name="transparent">#008708BE</color>
 </resources>

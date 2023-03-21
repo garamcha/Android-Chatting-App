@@ -9,6 +9,8 @@ import com.example.chattingapp.databinding.ActivityLoginBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 
 class LoginActivity : AppCompatActivity() {
@@ -16,6 +18,10 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var binding : ActivityLoginBinding
     // FirebaseAuth 의 인스턴스를 선언
     private lateinit var auth : FirebaseAuth
+    private var userName : String? = null
+
+    private var firestore: FirebaseFirestore? = null
+    private var uid : String? = null
     private companion object {
         const val TAG = "로그"
     }
@@ -28,6 +34,7 @@ class LoginActivity : AppCompatActivity() {
 
         // onCreate() 메서드에서 FirebaseAuth 인스턴스를 초기화
         auth = Firebase.auth
+        firestore = FirebaseFirestore.getInstance()
 
         /** Login 버튼을 눌렀을 때 **/
         binding.LoginBtn.setOnClickListener {
@@ -48,10 +55,22 @@ class LoginActivity : AppCompatActivity() {
             }
             else{
                 auth.signInWithEmailAndPassword(email, password).addOnCompleteListener {
+                    uid = FirebaseAuth.getInstance().currentUser?.uid
+
                     if(it.isSuccessful){
                         Log.d(TAG, "Success Login - LoginActivity" )
-                        // 로그인 성공 시 MainActivity로 이동하기
-                        moveMainPage(it.result?.user) // 현재 로그인한 유저 정보 가져와서 MainPage로 이동
+                        Log.d(TAG, "currentUser UID ${uid}- LoginActivity" )
+                        // 회원가입 시 파이어스토어에 저장된 이름 가져오기
+                        firestore!!.collection("users").document(uid!!).get()
+                            .addOnSuccessListener {document->
+                                userName = document["userName"] as String
+                                Log.d("로그", "DocumentSnapshot datas1 : ${document.data}")
+                                Log.d("로그", "DocumentSnapshot datas2 : ${document["userName"]}")
+                                Log.d("로그", "DocumentSnapshot datas3 : ${userName}")
+                                Toast.makeText(this, "${userName}님 환영합니다:)", Toast.LENGTH_SHORT).show()
+                                // 로그인 성공 시 MainActivity로 이동하기
+                                moveMainPage(it.result?.user) // 현재 로그인한 유저 정보 가져와서 MainPage로 이동
+                            }
                     }
                     else{
                         Log.d(TAG, "Failed Login - LoginActivity" )
@@ -68,7 +87,14 @@ class LoginActivity : AppCompatActivity() {
             // 명시적 Intent 사용
             val intent = Intent(this, SignUpActivity::class.java)
             startActivity(intent)
+            moveMainPage(auth?.currentUser)
         }
+    }
+
+    // 로그아웃 하지 않았을 경우. 자동 로그인
+    override fun onStart() {
+        super.onStart()
+        moveMainPage(auth?.currentUser)
     }
     
     // MainActivity로 이동하는 함수

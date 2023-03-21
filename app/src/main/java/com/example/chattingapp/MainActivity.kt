@@ -3,7 +3,10 @@ package com.example.chattingapp
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.Toast
+import android.widget.Toolbar
 import com.example.chattingapp.databinding.ActivityMainBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
@@ -30,6 +33,9 @@ class MainActivity : AppCompatActivity(){
         setContentView(binding.root)
         Log.d(TAG, "MainActivity - onCreate() called")
 
+        val toolbar = binding.mainToolbar
+        setSupportActionBar(toolbar)
+
         var mainFrame = R.id.fragment_frame //MainActivity FrameLayout ID
         friendFragment = FriendFragment.newInstance()
         // 처음 실행하였을 때 비어있는 MainActivity에 Fragment추가하기
@@ -39,7 +45,7 @@ class MainActivity : AppCompatActivity(){
         bottomNavigationView.setOnItemSelectedListener { menuItem->
             when(menuItem.itemId){
                 R.id.menu_friend -> {
-                    Log.d(TAG, "MainActivity - 친구버튼 클릭")
+                    Log.d(TAG, "MainActivity - 친구 Fragment")
                     // 친구 버튼 클릭 시 FriendFragment 보여주기
                     friendFragment = FriendFragment.newInstance()
                     supportFragmentManager.beginTransaction().replace(mainFrame, friendFragment).commit()
@@ -47,7 +53,8 @@ class MainActivity : AppCompatActivity(){
                     true
                 }
                 R.id.menu_list -> {
-                    Log.d(TAG, "MainActivity - 채팅목록버튼 클릭")
+                    Log.d(TAG, "MainActivity - 채팅 목록 Fragment")
+                    setTitle("채팅방")
                     // 채팅목록 버튼 클릭 시 ListFragment 보여주기
                     listFragment = ListFragment.newInstance()
                     supportFragmentManager.beginTransaction().replace(mainFrame, listFragment).commit()
@@ -55,7 +62,7 @@ class MainActivity : AppCompatActivity(){
                     true
                 }
                 R.id.menu_setting -> {
-                    Log.d(TAG, "MainActivity - 설정버튼 클릭")
+                    Log.d(TAG, "MainActivity - 설정 Fragment")
                     // 설정 버튼 클릭 시 SettingFragment 보여주기
                     settingFragment = SettingFragment.newInstance()
                     supportFragmentManager.beginTransaction().replace(mainFrame, settingFragment).commit()

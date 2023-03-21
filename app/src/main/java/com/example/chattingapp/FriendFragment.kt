@@ -2,11 +2,14 @@ package com.example.chattingapp
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.PorterDuff
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -39,6 +42,9 @@ class FriendFragment:Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "FriendFragment - onCreate() called")
+        // 앱바 프래그먼트가 옵션 메뉴를 채우는데 참여하고 있다고 시스템에 알림
+        // 프래그먼트가 메뉴 관련 콜백을 수신하려 한다고 시스템에 알립
+        setHasOptionsMenu(true)
     }
 
     //Fragment를 안고 있는 액티비티에 붙었을 때
@@ -58,6 +64,18 @@ class FriendFragment:Fragment() {
         mBinding = FragmentFriendBinding.inflate(inflater, container, false)
         auth = Firebase.auth
 
+        //1. 툴바 사용 설정
+        val toolbar = binding.toolbar
+        (activity as AppCompatActivity).setSupportActionBar(toolbar) // 내가 만든 툴바 사용
+        toolbar.title = "친구 목록"
+        //(activity as AppCompatActivity).supportActionBar?.title = "새로운 타이틀"
+
+
+        /*// 2. 툴바 왼쪽 버튼 설정
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)  // 왼쪽 버튼 사용 여부 true
+        supportActionBar!!.setHomeAsUpIndicator()  // 왼쪽 버튼 아이콘 설정
+        supportActionBar!!.setDisplayShowTitleEnabled(false)*/
+
        /* mBinding!!.testLogoutBtn.setOnClickListener {
             // 사용자 계정 로그아웃
             auth.signOut()
@@ -68,6 +86,7 @@ class FriendFragment:Fragment() {
             startActivity(Intent(requireContext(), LoginActivity::class.java))
         }
 */
+
         recyclerView = binding.friendRecy
         val dataList = ArrayList<ProfileData>()
         profileAdapter = ProfileAdapter(dataList)
@@ -107,8 +126,41 @@ class FriendFragment:Fragment() {
         return binding.root
     }
 
+    // 3. 툴바 메뉴 버튼을 설정
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.toolbar_friend_menu, menu)
+        // IconColor 변경 함수
+        changeIconColor(menu)
+    }
+
+    // 4. 툴바 메뉴 버튼이 클릭 되었을 때 콜백
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // 클릭된 메뉴 아이템의 아이디 마다 when 구절로 클릭 시 동작 설정
+        when(item!!.itemId){
+            R.id.menu_search -> { // 검색 버튼
+                Toast.makeText(activity, "Search menu pressed.", Toast.LENGTH_SHORT).show()
+            }
+            R.id.menu_add -> {// 검색 버튼
+                Toast.makeText(activity, "Add menu pressed.", Toast.LENGTH_SHORT).show()
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    // Toolbar Drawble로 설정한 IconColor 변경 함수
+    fun changeIconColor(menu: Menu){
+        for(m in 0 until  menu.size()){
+            val drawable : Drawable? = menu.getItem(m).icon
+            if(drawable != null){
+                drawable.mutate() // rawable 객체를 수정 가능하게 만듬
+                drawable.setTint(ContextCompat.getColor(requireActivity(), R.color.dark_purple)) // Drawable에 색상 필터를 적용
+                drawable.setTintMode(PorterDuff.Mode.SRC_ATOP) //  Drawable에 적용되는 색상 필터의 블렌딩 모드를 설정
+                //PorterDuff.Mode.SRC_ATOP은 기존 색상과 새로운 색상을 합칠 때, 새로운 색상이 기존 색상을 덮어쓰는 모드
+            }
+        }
+    }
     /* Fragment에서 View Binding을 사용할 경우 Fragment는 View보다 오래 지속되어,
-    Fragment의 Lifecycle로 인해 메모리 누수가 발생할 수 있기 때문*/
+        Fragment의 Lifecycle로 인해 메모리 누수가 발생할 수 있기 때문*/
     override fun onDestroy() {
         mBinding = null
         super.onDestroy()

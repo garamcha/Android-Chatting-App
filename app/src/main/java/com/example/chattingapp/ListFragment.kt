@@ -1,11 +1,14 @@
 package com.example.chattingapp
 
 import android.content.Context
+import android.graphics.PorterDuff
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.chattingapp.databinding.FragmentListBinding
 
@@ -28,6 +31,8 @@ class ListFragment:Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "ListFragment - onCreate() called")
+        // 프래그먼트가 메뉴 관련 콜백을 수신하려 한다고 시스템에 알립
+        setHasOptionsMenu(true)
     }
 
     //Fragment를 안고 있는 액티비티에 붙었을 때
@@ -45,7 +50,49 @@ class ListFragment:Fragment() {
         // 액티비티 와는 다르게 layoutInflater 를 쓰지 않고 inflater 인자를 가져와 뷰와 연결한다.
         Log.d(TAG, "ListFragment - onCreateView() called")
         mBinding = FragmentListBinding.inflate(inflater, container, false)
+
+        //1. 툴바 사용 설정
+        val toolbar = binding.toolbar
+        (activity as AppCompatActivity).setSupportActionBar(toolbar) // 내가 만든 툴바 사용
+        toolbar.title = "채팅방"
+
         return binding.root
+
+    }
+
+    // 3. 툴바 메뉴 버튼을 설정
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.toolbar_list_menu, menu)
+        changeIconColor(menu)
+    }
+
+    // 4. 툴바 메뉴 버튼이 클릭 되었을 때 콜백
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // 클릭된 메뉴 아이템의 아이디 마다 when 구절로 클릭 시 동작 설정
+        when(item!!.itemId){
+            R.id.menu_search -> { // 검색 버튼
+                Toast.makeText(activity, "Search menu pressed.", Toast.LENGTH_SHORT).show()
+            }
+            R.id.menu_upsort -> {// 오름차순 버튼
+                Toast.makeText(activity, "Up Sort pressed.", Toast.LENGTH_SHORT).show()
+            }
+            R.id.menu_downsort -> {// 내림차순 버튼
+                Toast.makeText(activity, "Down Sort pressed.", Toast.LENGTH_SHORT).show()
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    fun changeIconColor(menu: Menu){
+        for(m in 0 until  menu.size()){
+            val drawable : Drawable? = menu.getItem(m).icon
+            if(drawable != null){
+                drawable.mutate() // rawable 객체를 수정 가능하게 만듬
+                drawable.setTint(ContextCompat.getColor(requireActivity(), R.color.dark_purple)) // Drawable에 색상 필터를 적용
+                drawable.setTintMode(PorterDuff.Mode.SRC_ATOP) //  Drawable에 적용되는 색상 필터의 블렌딩 모드를 설정
+                //PorterDuff.Mode.SRC_ATOP은 기존 색상과 새로운 색상을 합칠 때, 새로운 색상이 기존 색상을 덮어쓰는 모드
+            }
+        }
     }
 
     /* Fragment에서 View Binding을 사용할 경우 Fragment는 View보다 오래 지속되어,
