@@ -76,17 +76,6 @@ class FriendFragment:Fragment() {
         supportActionBar!!.setHomeAsUpIndicator()  // 왼쪽 버튼 아이콘 설정
         supportActionBar!!.setDisplayShowTitleEnabled(false)*/
 
-       /* mBinding!!.testLogoutBtn.setOnClickListener {
-            // 사용자 계정 로그아웃
-            auth.signOut()
-            Log.d(TAG, "Logout Button Click. - FriendFragment")
-            Toast.makeText(requireContext(), "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show()
-
-            // 로그인 화면으로 이동
-            startActivity(Intent(requireContext(), LoginActivity::class.java))
-        }
-*/
-
         recyclerView = binding.friendRecy
         val dataList = ArrayList<ProfileData>()
         profileAdapter = ProfileAdapter(dataList)
@@ -105,20 +94,6 @@ class FriendFragment:Fragment() {
 
         dataList.add(ProfileData(R.drawable.ic_friend, "Ramy"))
         dataList.add(ProfileData(R.drawable.ic_friend, "Choi"))
-        dataList.add(ProfileData(R.drawable.ic_friend, "James"))
-        dataList.add(ProfileData(R.drawable.ic_friend, "David"))
-        dataList.add(ProfileData(R.drawable.ic_friend, "Ramy"))
-        dataList.add(ProfileData(R.drawable.ic_friend, "Choi"))
-        dataList.add(ProfileData(R.drawable.ic_friend, "James"))
-        dataList.add(ProfileData(R.drawable.ic_friend, "David"))
-        dataList.add(ProfileData(R.drawable.ic_friend, "Ramy"))
-        dataList.add(ProfileData(R.drawable.ic_friend, "Choi"))
-        dataList.add(ProfileData(R.drawable.ic_friend, "James"))
-        dataList.add(ProfileData(R.drawable.ic_friend, "David"))
-        dataList.add(ProfileData(R.drawable.ic_friend, "Ramy"))
-        dataList.add(ProfileData(R.drawable.ic_friend, "Choi"))
-        dataList.add(ProfileData(R.drawable.ic_friend, "James"))
-        dataList.add(ProfileData(R.drawable.ic_friend, "David"))
 
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
@@ -140,8 +115,11 @@ class FriendFragment:Fragment() {
             R.id.menu_search -> { // 검색 버튼
                 Toast.makeText(activity, "Search menu pressed.", Toast.LENGTH_SHORT).show()
             }
-            R.id.menu_add -> {// 검색 버튼
-                Toast.makeText(activity, "Add menu pressed.", Toast.LENGTH_SHORT).show()
+            R.id.menu_add -> {// 친구 추가 버튼
+                // 친구 추가 버튼 클릭 시
+                // 팝업 창에서 전화번호로 친구 추가 가능
+                val dialog = AddFriendDialog(requireContext() as AppCompatActivity)
+                dialog.show()
             }
         }
         return super.onOptionsItemSelected(item)

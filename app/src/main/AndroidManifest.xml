@@ -13,9 +13,12 @@
         android:theme="@style/Theme.ChattingApp"
         tools:targetApi="31">
         <activity
+            android:name=".AddFriendDialog"
+            android:exported="false" />
+        <activity
             android:name=".ProfileDetailActivity"
             android:exported="false"
-            android:theme="@style/Transparent"/>
+            android:theme="@style/Transparent" />
         <activity
             android:name=".ChattingActivity"
             android:exported="false" />

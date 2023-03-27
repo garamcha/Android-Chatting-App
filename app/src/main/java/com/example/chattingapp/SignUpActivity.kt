@@ -3,6 +3,7 @@ package com.example.chattingapp
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.telephony.PhoneNumberFormattingTextWatcher
 import android.util.Log
 import android.widget.Toast
 import com.example.chattingapp.databinding.ActivitySignUpBinding
@@ -34,6 +35,9 @@ class SignUpActivity : AppCompatActivity() {
         auth = Firebase.auth
         firestore = FirebaseFirestore.getInstance()
 
+        // 전화번호 입력 시 자동 하이픈 추가
+        binding.phoneEt.addTextChangedListener(PhoneNumberFormattingTextWatcher())
+
         /**
          * 회원가입
          * */
@@ -44,6 +48,8 @@ class SignUpActivity : AppCompatActivity() {
             val name = binding.nameEt.text.toString().trim()
             // 사용자의 이메일 주소
             val email = binding.emailEt.text.toString().trim()
+            // 사용자의 전화번호
+            val phone = binding.phoneEt.text.toString().trim()
             // 사용자의 비밀번호
             val password = binding.pwdEt.text.toString().trim()
             // 사용자의 비밀번호 확인
@@ -56,6 +62,9 @@ class SignUpActivity : AppCompatActivity() {
             else if(!LoginActivity().isNull(email)){
                 Toast.makeText(this, "이메일을 입력하세요.", Toast.LENGTH_SHORT).show()
             }
+            else if(!LoginActivity().isNull(phone)){
+                Toast.makeText(this, "전화번호를 입력하세요.", Toast.LENGTH_SHORT).show()
+            }
             else if(!LoginActivity().isNull(password)){
                 Toast.makeText(this, "비밀번호를 입력하세요.", Toast.LENGTH_SHORT).show()
             }
@@ -64,7 +73,7 @@ class SignUpActivity : AppCompatActivity() {
             }
             else{
                 // 사용자 계정 만들기
-                createUser(email, password, name)
+                createUser(email, password, name, phone)
             }
         }
 
@@ -72,7 +81,7 @@ class SignUpActivity : AppCompatActivity() {
     }
 
     // 사용자 계정 만들기
-    private fun createUser(email: String, password: String, name : String) {
+    private fun createUser(email: String, password: String, name : String, phone: String) {
         auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener {
 
             if(it.isSuccessful){
@@ -81,7 +90,7 @@ class SignUpActivity : AppCompatActivity() {
                 Log.d(TAG, "Create Account Success - SignUpActivity" )
 
                 // Firebase에 회원정보 저장
-                uploadUserInfo(user, name, email)
+                uploadUserInfo(user, name, email, phone)
 
                 // MainActivity로 넘어가기
                 val intent = Intent(this, MainActivity::class.java)
@@ -96,9 +105,9 @@ class SignUpActivity : AppCompatActivity() {
     }
 
     /// 사용자 계정 CloudFirestore에 저장하는 함수
-    private fun uploadUserInfo(user: FirebaseUser?, name : String, email: String){
+    private fun uploadUserInfo(user: FirebaseUser?, name : String, email: String, phone: String){
         // UserData DataClass로 변수 선언
-        val newUser = UserData(name, email, user!!.uid)
+        val newUser = UserData(name, email, user!!.uid, phone)
         /*newUser.userName = name
           newUser.userId = email
           newUser.uid = user!!.uid*/

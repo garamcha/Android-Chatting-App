@@ -29,7 +29,7 @@
         <item name="android:windowLightStatusBar">false</item> <!--Status Bar 아이콘의 색상 true:검은 아이콘, false:흰 아이콘-->
         <item name="toolbarStyle">@style/ToolbarStyle.Dark</item> <!--Toolbar 스타일-->
         <item name="toolbarNavigationButtonStyle">@style/ToolbarButtonStyle</item>
-        <item name="actionMenuTextColor">@color/light_purple</item> <!--액션 메뉴의 텍스트 색상-->
+        <item name="actionMenuTextColor">@color/main_purple</item> <!--액션 메뉴의 텍스트 색상-->
         <item name="colorControlNormal">@color/dark_purple</item> <!--홈/뒤로가기 버튼의 색상-->
     </style>
 

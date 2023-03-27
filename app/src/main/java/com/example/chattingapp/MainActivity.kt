@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
+import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.Toast
 import android.widget.Toolbar
@@ -73,4 +74,25 @@ class MainActivity : AppCompatActivity(){
             } // when(menuItem.itemId)
         } // bottomNavigationView.setOnItemSelectedListener
     } // override fun onCreate
+
+
+ /*   // 3. 툴바 메뉴 버튼을 설정
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.toolbar_friend_menu, menu)
+    }
+
+    // 4. 툴바 메뉴 버튼이 클릭 되었을 때 콜백
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // 클릭된 메뉴 아이템의 아이디 마다 when 구절로 클릭 시 동작 설정
+        when(item!!.itemId){
+            R.id.menu_search -> { // 검색 버튼
+                Toast.makeText(this, "Search menu pressed.", Toast.LENGTH_SHORT).show()
+            }
+            R.id.menu_add -> {// 검색 버튼
+                Toast.makeText(this, "Add menu pressed.", Toast.LENGTH_SHORT).show()
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+*/
 } // class MainActivity : AppCompatActivity()
