@@ -37,15 +37,15 @@
         android:id="@+id/chatbtn"
         android:layout_width="80dp"
         android:layout_height="69dp"
+        android:layout_marginTop="100dp"
+        android:background="@color/transparent"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_chat"
-        android:background="@color/transparent"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/profileName"
-        app:layout_constraintVertical_bias="0.736"
+        app:layout_constraintVertical_bias="0.0"
         app:tint="@color/yellow" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

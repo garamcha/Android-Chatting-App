@@ -28,6 +28,8 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //DefaultHandler 지정
+        Thread.setDefaultUncaughtExceptionHandler(ExceptionHandler())
         // binding 객체 선언
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -61,7 +63,7 @@ class LoginActivity : AppCompatActivity() {
                         Log.d(TAG, "Success Login - LoginActivity" )
                         Log.d(TAG, "currentUser UID ${uid}- LoginActivity" )
                         // 회원가입 시 파이어스토어에 저장된 이름 가져오기
-                        firestore!!.collection("users").document(uid!!).get()
+                        firestore!!.collection("users").document(email!!).get()
                             .addOnSuccessListener {document->
                                 userName = document["userName"] as String
                                 Log.d("로그", "DocumentSnapshot datas1 : ${document.data}")
@@ -87,15 +89,25 @@ class LoginActivity : AppCompatActivity() {
             // 명시적 Intent 사용
             val intent = Intent(this, SignUpActivity::class.java)
             startActivity(intent)
-            moveMainPage(auth?.currentUser)
+        }
+    }
+    // Handler 구현
+    inner class ExceptionHandler : Thread.UncaughtExceptionHandler{
+        override fun uncaughtException(p0: Thread, p1: Throwable) {
+            // 앱이 비정상적으로 종료 되었을 경우 로그아웃
+            auth?.signOut()
         }
     }
 
     // 로그아웃 하지 않았을 경우. 자동 로그인
-    override fun onStart() {
+/*    override fun onStart() {
         super.onStart()
-        moveMainPage(auth?.currentUser)
-    }
+        Log.d("로그", "auth?.currentUser '${auth?.currentUser}' - LoginActivity onStart()")
+        var u = auth?.currentUser
+        Log.d("로그", "u?.email ' ${u?.email}' - LoginActivity onStart()")
+
+        moveMainPage(u)
+    }*/
     
     // MainActivity로 이동하는 함수
     fun moveMainPage(user: FirebaseUser?){

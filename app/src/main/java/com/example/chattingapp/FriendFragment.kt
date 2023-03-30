@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.chattingapp.databinding.FragmentFriendBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 
 class FriendFragment:Fragment() {
@@ -25,10 +26,15 @@ class FriendFragment:Fragment() {
     private val binding get() = mBinding!!
     // FirebaseAuth 의 인스턴스를 선언
     private lateinit var auth: FirebaseAuth
+    private lateinit var firestore: FirebaseFirestore
     // Recycler View 선언하기
     private lateinit var recyclerView: RecyclerView
     private lateinit var profileAdapter: ProfileAdapter
 
+    // 프로필 이미지 리스트
+    private  var imgList : ArrayList<Int> = arrayListOf(R.drawable.ic_friend)
+    // 프로필 정보 리스트
+    val dataList = ArrayList<ProfileData>()
     companion object{ // 정적으로 사용되는 부분이 object로 들어감
         const val TAG : String = "로그"
 
@@ -63,6 +69,7 @@ class FriendFragment:Fragment() {
         Log.d(TAG, "FriendFragment - onCreateView() called")
         mBinding = FragmentFriendBinding.inflate(inflater, container, false)
         auth = Firebase.auth
+        firestore = FirebaseFirestore.getInstance()
 
         //1. 툴바 사용 설정
         val toolbar = binding.toolbar
@@ -77,14 +84,13 @@ class FriendFragment:Fragment() {
         supportActionBar!!.setDisplayShowTitleEnabled(false)*/
 
         recyclerView = binding.friendRecy
-        val dataList = ArrayList<ProfileData>()
         profileAdapter = ProfileAdapter(dataList)
         recyclerView.adapter = profileAdapter
 
         profileAdapter.setOnItemClickListener(object : ProfileAdapter.OnItemClickListener{
             override fun onClick(v: View, data: ProfileData, position: Int) {
                 // 클릭 시 실행할 행동 입력
-                Intent(activity, ProfileDetailActivity::class.java).apply {
+                Intent(requireContext(), ProfileDetailActivity::class.java).apply {
                     putExtra("data", data)
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) //액티비티가 다른 애플리케이션과 독립적으로 실행되도록 보장
                 }.run { startActivity(this) } //현재 액티비티의 컨텍스트에서 다른 액티비티를 시작
@@ -92,8 +98,10 @@ class FriendFragment:Fragment() {
 
         })
 
-        dataList.add(ProfileData(R.drawable.ic_friend, "Ramy"))
-        dataList.add(ProfileData(R.drawable.ic_friend, "Choi"))
+
+
+        //dataList.add(ProfileData(imgList[0], "Ramy"))
+        //dataList.add(ProfileData(imgList[0], "Choi"))
 
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
@@ -120,6 +128,31 @@ class FriendFragment:Fragment() {
                 // 팝업 창에서 전화번호로 친구 추가 가능
                 val dialog = AddFriendDialog(requireContext() as AppCompatActivity)
                 dialog.show()
+
+                // 다이얼로그에서 정의한 interface를 통해 데이터를 받아온다.
+                dialog.setOnClickedListener(object : AddFriendDialog.ButtonClickListener{
+                    override fun onClicked(friendEmail: String) {
+                        // 다이얼로그에서 가져온 이메일 값으로 친구 추가하기
+                        firestore?.collection("users")?.document(friendEmail)?.get()
+                            ?.addOnSuccessListener {document ->
+                                Log.d(TAG,"document - $document")
+                                Log.d(TAG,"이름 ${document["userName"]}, ${document["userEmail"]}")
+                                val name = document["userName"] as String?
+                                val email = document["userEmail"] as String?
+                                if(name != null && email != null){
+                                    dataList.add(ProfileData(name, email))
+                                    profileAdapter.notifyDataSetChanged()
+                                    Toast.makeText(requireContext(), "친구추가 성공!!", Toast.LENGTH_SHORT).show()
+                                }
+                                else{
+                                    Toast.makeText(requireContext(), "존재하지 않는 친구입니다.", Toast.LENGTH_SHORT).show()
+                                }
+
+                            }?.addOnFailureListener {
+                               }
+                        
+                    }
+                })
             }
         }
         return super.onOptionsItemSelected(item)

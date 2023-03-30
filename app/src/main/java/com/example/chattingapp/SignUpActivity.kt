@@ -83,7 +83,6 @@ class SignUpActivity : AppCompatActivity() {
     // 사용자 계정 만들기
     private fun createUser(email: String, password: String, name : String, phone: String) {
         auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener {
-
             if(it.isSuccessful){
                 // 회원가입에 성공 했을 때
                 val user = auth.currentUser
@@ -92,10 +91,6 @@ class SignUpActivity : AppCompatActivity() {
                 // Firebase에 회원정보 저장
                 uploadUserInfo(user, name, email, phone)
 
-                // MainActivity로 넘어가기
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
-                finish()
             }
             // 회원가입에 실패 했을 때
             else{
@@ -111,10 +106,14 @@ class SignUpActivity : AppCompatActivity() {
         /*newUser.userName = name
           newUser.userId = email
           newUser.uid = user!!.uid*/
-        firestore.collection("users")?.document(auth.uid.toString())?.set(newUser)
+        firestore.collection("users")?.document(email)?.set(newUser)
             ?.addOnSuccessListener {
                 // Firestore 저장 성공 했을 때
-                Toast.makeText(this, "환영합니다 :)", Toast.LENGTH_SHORT).show()
+                // LoginActivity로 넘어가기
+                val intent = Intent(this, LoginActivity::class.java)
+                startActivity(intent)
+                finish()
+                Toast.makeText(this, "로그인 해주세요", Toast.LENGTH_SHORT).show()
             }
             ?.addOnFailureListener {
                 // Firestore 저장 실패 했을 때

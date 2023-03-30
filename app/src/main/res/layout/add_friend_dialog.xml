@@ -20,7 +20,8 @@
         android:id="@+id/addFriend_et"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:hint="친구 추가할 전화번호를 입력하세요."
+        android:hint="친구 추가할 이메일을 입력하세요."
+        android:inputType="textEmailAddress"
         android:layout_marginLeft="7dp"
         android:layout_marginRight="7dp"
         />

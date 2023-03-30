@@ -37,7 +37,7 @@
         android:id="@+id/email_tv"
         android:layout_width="320dp"
         android:layout_height="wrap_content"
-        android:text="아이디"
+        android:text="이메일"
         android:textSize="15dp"
         android:textColor="@color/black"
         app:layout_constraintBottom_toTopOf="@+id/email_et"

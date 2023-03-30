@@ -25,7 +25,7 @@ class ProfileAdapter(private var items: ArrayList<ProfileData>) : RecyclerView.A
 
         fun bind(item: ProfileData) {
             userName.text = item.name
-            userImg.setImageResource(item.img)
+            //userImg.setImageResource(item.img)
 
             val pos = adapterPosition
             if (pos != RecyclerView.NO_POSITION) {
