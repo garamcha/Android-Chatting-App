@@ -2,6 +2,7 @@ package com.example.chattingapp
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -54,6 +55,9 @@ class SettingFragment:Fragment() {
         mBinding = FragmentSettingBinding.inflate(inflater, container, false)
         auth = Firebase.auth
 
+        // SharedPreference 객체 선언
+        val auto : SharedPreferences = requireContext().getSharedPreferences("autoLogin", Context.MODE_PRIVATE)
+
         //1. 툴바 사용 설정
         val toolbar = binding.toolbar
         (activity as AppCompatActivity).setSupportActionBar(toolbar) // 내가 만든 툴바 사용
@@ -64,7 +68,10 @@ class SettingFragment:Fragment() {
             auth.signOut()
             Log.d(TAG, "Logout Button Click. - SettingFragment")
             Toast.makeText(requireContext(), "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show()
-
+            // 로그아웃 시 sharedPreference에 있는 데이터 삭제
+            val autoLogoutEdit = auto.edit()
+            autoLogoutEdit.clear()
+            autoLogoutEdit.commit()
             // 로그인 화면으로 이동
             startActivity(Intent(requireContext(), LoginActivity::class.java))
 

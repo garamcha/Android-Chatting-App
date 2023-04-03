@@ -17,20 +17,16 @@ class AddFriendDialog(private val context : AppCompatActivity) {
 
     private lateinit var binding: AddFriendDialogBinding
     private val dlg = Dialog(context)
-    private lateinit var auth: FirebaseAuth
-    private var firestore: FirebaseFirestore? = null
 
     fun show() {
         binding = AddFriendDialogBinding.inflate(context.layoutInflater)
 
         // EditText 초기화
         binding.addFriendEt.text = null
-        // 파이어베이스 객체 초기화
-        auth = Firebase.auth
-        firestore = FirebaseFirestore.getInstance()
 
         dlg.requestWindowFeature(Window.FEATURE_NO_TITLE) // 타이틀 바 제거
         dlg.setContentView(binding.root) // 다이얼로그에 사용할 xml 파일을 불러옴
+        dlg.setCanceledOnTouchOutside(false)// 다이얼로그의 바깥 화면을 눌렀을 때 다이얼로그가 닫히지 않음
         dlg.setCancelable(false)    // 다이얼로그의 바깥 화면을 눌렀을 때 다이얼로그가 닫히지 않음
 
         // 확인 버튼 동작

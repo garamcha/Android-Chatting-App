@@ -57,7 +57,9 @@ class FriendFragment:Fragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         Log.d(TAG,"FriendFragment - onAttach() called")
+
     }
+
 
     // View가 생성되었을 때 - 화면(Fragment)과 레이아웃을 연결
    override fun onCreateView(
@@ -98,7 +100,8 @@ class FriendFragment:Fragment() {
 
         })
 
-
+        // 파이어스토어에서 친구목록 불러오기
+        friendList()
 
         //dataList.add(ProfileData(imgList[0], "Ramy"))
         //dataList.add(ProfileData(imgList[0], "Choi"))
@@ -124,8 +127,8 @@ class FriendFragment:Fragment() {
                 Toast.makeText(activity, "Search menu pressed.", Toast.LENGTH_SHORT).show()
             }
             R.id.menu_add -> {// 친구 추가 버튼
-                // 친구 추가 버튼 클릭 시
-                // 팝업 창에서 전화번호로 친구 추가 가능
+                // 친구 추가 버튼(+) 클릭 시
+                // 팝업 창에서 이메일로로 친구 추가 가능
                 val dialog = AddFriendDialog(requireContext() as AppCompatActivity)
                 dialog.show()
 
@@ -133,24 +136,7 @@ class FriendFragment:Fragment() {
                 dialog.setOnClickedListener(object : AddFriendDialog.ButtonClickListener{
                     override fun onClicked(friendEmail: String) {
                         // 다이얼로그에서 가져온 이메일 값으로 친구 추가하기
-                        firestore?.collection("users")?.document(friendEmail)?.get()
-                            ?.addOnSuccessListener {document ->
-                                Log.d(TAG,"document - $document")
-                                Log.d(TAG,"이름 ${document["userName"]}, ${document["userEmail"]}")
-                                val name = document["userName"] as String?
-                                val email = document["userEmail"] as String?
-                                if(name != null && email != null){
-                                    dataList.add(ProfileData(name, email))
-                                    profileAdapter.notifyDataSetChanged()
-                                    Toast.makeText(requireContext(), "친구추가 성공!!", Toast.LENGTH_SHORT).show()
-                                }
-                                else{
-                                    Toast.makeText(requireContext(), "존재하지 않는 친구입니다.", Toast.LENGTH_SHORT).show()
-                                }
-
-                            }?.addOnFailureListener {
-                               }
-                        
+                        addFriendList(friendEmail)
                     }
                 })
             }
@@ -170,6 +156,69 @@ class FriendFragment:Fragment() {
             }
         }
     }
+
+    // 친구 목록을 불러오는 함수
+    private fun friendList(){
+        // 친구 목록 파이어스토어에서 불러오기
+        firestore.collection("users").document(auth.currentUser?.email!!)
+            .collection("friendList").get()
+            .addOnSuccessListener {result ->
+                for(document in result){
+                    dataList.add(ProfileData(document.data["name"] as String?, document.id))
+                    Log.d(TAG,"파이어스토어에서 친구목록 가져오기 ${document.id} => ${document.data}" )
+                    profileAdapter.notifyDataSetChanged()
+                }
+            }.addOnFailureListener {exception ->
+                Log.d(TAG, "Error getting documents: ", exception)
+            }
+    }
+
+    // 친구 추가 함수
+    private fun addFriendList(friendEmail : String){
+        var result : Int = 0
+
+        for (data in dataList){ // 이미 친구추가가 되어있는 친구는 추가 불가능
+            if(friendEmail.equals(data.email)){
+                result = 1
+            }
+        }
+        // 본인은 추가 불가
+        if(friendEmail == auth.currentUser!!.email){ // 자기 자신은 친구추가 불가능
+            result = 2
+        }
+        when(result){
+            1 -> { // 이미 친구추가가 되어있는 친구는 추가 불가능
+                Toast.makeText(requireContext(), "이미 친구입니다.", Toast.LENGTH_SHORT).show()
+            }
+            2-> { // 본인은 추가 불가
+                Toast.makeText(requireContext(), "본인은 친구 추가가 불가능합니다.", Toast.LENGTH_SHORT).show()
+            }
+            else -> { // 친구추가
+                firestore?.collection("users")?.document(friendEmail)?.get()
+                    ?.addOnSuccessListener {document ->
+                        Log.d(TAG,"document - $document")
+                        Log.d(TAG,"이름 ${document["userName"]}, ${document["userEmail"]}")
+                        val name = document["userName"] as String?
+                        val email = document["userEmail"] as String?
+                        if(name != null && email != null){
+                            dataList.add(ProfileData(name, email))
+                            profileAdapter.notifyDataSetChanged()
+                            // 친구추가 목록 파이어스토어에 저장하기
+                            firestore?.collection("users")!!.document(auth.currentUser!!.email!!)
+                                .collection("friendList")!!.document(friendEmail).set(ProfileData(name, email))
+                            Toast.makeText(requireContext(), "친구추가 성공!!", Toast.LENGTH_SHORT).show()
+                        }
+                        else{
+                            Toast.makeText(requireContext(), "존재하지 않는 친구입니다.", Toast.LENGTH_SHORT).show()
+                        }
+
+                    }?.addOnFailureListener {
+                        Toast.makeText(requireContext(), "존재하지 않는 친구입니다.", Toast.LENGTH_SHORT).show()
+                    }
+            }
+        }
+    }
+
     /* Fragment에서 View Binding을 사용할 경우 Fragment는 View보다 오래 지속되어,
         Fragment의 Lifecycle로 인해 메모리 누수가 발생할 수 있기 때문*/
     override fun onDestroy() {
