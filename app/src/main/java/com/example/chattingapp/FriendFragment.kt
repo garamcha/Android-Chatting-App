@@ -13,11 +13,13 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.chattingapp.databinding.FragmentFriendBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
 
 class FriendFragment:Fragment() {
     // 바인딩 객체 타입에 ?를 붙여서 null을 허용 해줘야한다. ( onDestroy 될 때 완벽하게 제거를 하기위해 )
@@ -30,6 +32,9 @@ class FriendFragment:Fragment() {
     // Recycler View 선언하기
     private lateinit var recyclerView: RecyclerView
     private lateinit var profileAdapter: ProfileAdapter
+
+    //프로필 디테일 액티비티 내 프로필과  친구 프로필 구분을 위한 변수
+    val result = true
 
     // 프로필 이미지 리스트
     private  var imgList : ArrayList<Int> = arrayListOf(R.drawable.ic_friend)
@@ -60,6 +65,50 @@ class FriendFragment:Fragment() {
 
     }
 
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG,"FriendFragment - onResume() called")
+        var myName : String? = null
+        var myEmail : String? = null
+        var myProfile : String? = null
+
+        // 내 프로필 가져오기
+        firestore.collection("users").document(auth.currentUser?.email!!).get()
+            .addOnSuccessListener {
+                myProfile = it["uri"] as? String // null cannot be cast to non-null type kotlin.String 오류 해결을 위해 ? 추가ㅇ
+                myName = it["userName"] as String
+                myEmail = it["userEmail"] as String
+
+                if(myProfile != null && myProfile!!.length != 0){
+                    var storage : FirebaseStorage? = FirebaseStorage.getInstance() //FirebaseStorage 인스턴스 생성
+                    var storageRef = storage?.reference
+                    var currentUserEmail = auth.currentUser?.email
+
+                    storageRef?.child("profileImages/${currentUserEmail}/$myProfile")?.downloadUrl
+                        ?.addOnSuccessListener {uri ->
+                            Log.d("로그", "내프로필 파이어 스토어에서 이미지 파일 가져오기 성공 - FriendFragment")
+                            Glide.with(this).load(uri).into(binding.profileImage)
+
+                        }?.addOnFailureListener {
+                            Log.d("로그", "내프로필 파이어 스토어에서 이미지 파일 가져오기 실패 - FriendFragment")
+                        }
+                }else{
+                    binding.profileImage.setImageResource(R.drawable.ic_thumnail)
+                }
+
+                binding.myName.text = myName
+                Log.d("로그", "파이어베이스 함수 내부 -> 이름 : $myName, 이메일 : $myEmail, 이미지 : $myProfile")
+            }
+
+        Log.d("로그", "파이어베이스 함수 밖 -> 이름 : $myName, 이메일 : $myEmail, 이미지 : $myProfile")
+
+        // 내 프로필 클릭 했을 때
+        binding.linearLayout2.setOnClickListener {
+            var data : ProfileData = ProfileData(myProfile, myName, myEmail)
+            moveProfileDetail(true, data)
+        }
+
+    }
 
     // View가 생성되었을 때 - 화면(Fragment)과 레이아웃을 연결
    override fun onCreateView(
@@ -73,6 +122,9 @@ class FriendFragment:Fragment() {
         auth = Firebase.auth
         firestore = FirebaseFirestore.getInstance()
 
+
+
+
         //1. 툴바 사용 설정
         val toolbar = binding.toolbar
         (activity as AppCompatActivity).setSupportActionBar(toolbar) // 내가 만든 툴바 사용
@@ -85,27 +137,22 @@ class FriendFragment:Fragment() {
         supportActionBar!!.setHomeAsUpIndicator()  // 왼쪽 버튼 아이콘 설정
         supportActionBar!!.setDisplayShowTitleEnabled(false)*/
 
+
         recyclerView = binding.friendRecy
         profileAdapter = ProfileAdapter(dataList)
         recyclerView.adapter = profileAdapter
 
+        // 리사이클러뷰 클릭 했을 때
         profileAdapter.setOnItemClickListener(object : ProfileAdapter.OnItemClickListener{
             override fun onClick(v: View, data: ProfileData, position: Int) {
                 // 클릭 시 실행할 행동 입력
-                Intent(requireContext(), ProfileDetailActivity::class.java).apply {
-                    putExtra("data", data)
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) //액티비티가 다른 애플리케이션과 독립적으로 실행되도록 보장
-                }.run { startActivity(this) } //현재 액티비티의 컨텍스트에서 다른 액티비티를 시작
+                moveProfileDetail(false, data)
             }
 
         })
 
         // 파이어스토어에서 친구목록 불러오기
         friendList()
-
-        //dataList.add(ProfileData(imgList[0], "Ramy"))
-        //dataList.add(ProfileData(imgList[0], "Choi"))
-
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         profileAdapter.notifyDataSetChanged()
@@ -157,6 +204,15 @@ class FriendFragment:Fragment() {
         }
     }
 
+    // 프로필 디테일 액티비티로 이동하는 함수
+    private fun moveProfileDetail(result : Boolean, data: ProfileData){
+        Intent(requireContext(), ProfileDetailActivity::class.java).apply {
+            putExtra("data", data)
+            putExtra("result", result)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) //액티비티가 다른 애플리케이션과 독립적으로 실행되도록 보장
+        }.run { startActivity(this) } //현재 액티비티의 컨텍스트에서 다른 액티비티를 시작
+    }
+
     // 친구 목록을 불러오는 함수
     private fun friendList(){
         // 친구 목록 파이어스토어에서 불러오기
@@ -164,9 +220,14 @@ class FriendFragment:Fragment() {
             .collection("friendList").get()
             .addOnSuccessListener {result ->
                 for(document in result){
-                    dataList.add(ProfileData(document.data["name"] as String?, document.id))
-                    Log.d(TAG,"파이어스토어에서 친구목록 가져오기 ${document.id} => ${document.data}" )
-                    profileAdapter.notifyDataSetChanged()
+                    firestore.collection("users").document(document.id).get()
+                        .addOnSuccessListener { document ->
+                            dataList.add(ProfileData(document["uri"] as? String, document["userName"] as String, document["userEmail"] as String))
+                            Log.d(TAG,"파이어스토어에서 친구목록 가져오기 ${document["uri"] as? String}, ${document["userName"] as String}, ${document["userEmail"] as String}" )
+                            profileAdapter.notifyDataSetChanged()
+                        }.addOnFailureListener { exception ->
+                            Log.d(TAG, "Error getting documents: ", exception)
+                        }
                 }
             }.addOnFailureListener {exception ->
                 Log.d(TAG, "Error getting documents: ", exception)
@@ -198,15 +259,17 @@ class FriendFragment:Fragment() {
                     ?.addOnSuccessListener {document ->
                         Log.d(TAG,"document - $document")
                         Log.d(TAG,"이름 ${document["userName"]}, ${document["userEmail"]}")
-                        val name = document["userName"] as String?
-                        val email = document["userEmail"] as String?
+                        val name = document["userName"] as String
+                        val email = document["userEmail"] as String
+                        val uri = document["uri"] as String?
                         if(name != null && email != null){
-                            dataList.add(ProfileData(name, email))
+                            dataList.add(ProfileData(uri, name, email))
                             profileAdapter.notifyDataSetChanged()
                             // 친구추가 목록 파이어스토어에 저장하기
                             firestore?.collection("users")!!.document(auth.currentUser!!.email!!)
-                                .collection("friendList")!!.document(friendEmail).set(ProfileData(name, email))
+                                .collection("friendList")!!.document(friendEmail).set(ProfileData(uri, name, email))
                             Toast.makeText(requireContext(), "친구추가 성공!!", Toast.LENGTH_SHORT).show()
+
                         }
                         else{
                             Toast.makeText(requireContext(), "존재하지 않는 친구입니다.", Toast.LENGTH_SHORT).show()

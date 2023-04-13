@@ -102,7 +102,8 @@ class SignUpActivity : AppCompatActivity() {
     /// 사용자 계정 CloudFirestore에 저장하는 함수
     private fun uploadUserInfo(user: FirebaseUser?, name : String, email: String, phone: String){
         // UserData DataClass로 변수 선언
-        val newUser = UserData(name, email, user!!.uid, phone)
+        val newUser = UserData(name,null, email, user!!.uid, phone) // 처음 유저 생성시 프로필 이미지는 null 값으로 생성한다.
+
         /*newUser.userName = name
           newUser.userId = email
           newUser.uid = user!!.uid*/
