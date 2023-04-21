@@ -39,6 +39,7 @@ class ProfileDetailActivity : AppCompatActivity() {
         if(result){ // result가 true면 톱니바퀴가 보임
             // 액션바 추가하여 프로필 변경할 수 있도록 설정
             binding.profileModify.visibility = View.VISIBLE
+            binding.chatbtn.visibility = View.INVISIBLE
         }
         else{ // 톱니바퀴 안보임
             binding.profileModify.visibility =  View.INVISIBLE
@@ -49,7 +50,7 @@ class ProfileDetailActivity : AppCompatActivity() {
                 // 설정된 프로필 없을 경우 기본 이미지로 설정
                 binding.profileImg.setImageResource(R.drawable.ic_thumnail)
             }else{
-                // 파이어베이스 스토리지에서 이미지 가져오기ㅇ
+                // 파이어베이스 스토리지에서 이미지 가져오기
                 storageRef?.child("profileImages/${datas.email}/${datas.img}")?.downloadUrl
                     ?.addOnSuccessListener {uri ->
                         Log.d("로그", "파이어 스토어에서 이미지 파일 가져오기 성공 - ProfileDetailActivity")

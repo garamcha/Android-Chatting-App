@@ -33,8 +33,6 @@ class FriendFragment:Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var profileAdapter: ProfileAdapter
 
-    //프로필 디테일 액티비티 내 프로필과  친구 프로필 구분을 위한 변수
-    val result = true
 
     // 프로필 이미지 리스트
     private  var imgList : ArrayList<Int> = arrayListOf(R.drawable.ic_friend)

@@ -138,24 +138,21 @@ class ProfileModifyActivity : AppCompatActivity() {
         var imgFileName = "IMAGE_" + timeStamp + "_.jpg"
         //파일 업로드, 다운로드, 삭제, 메타데이터 가져오기 또는 업데이트를 하기 위해 참조를 생성.
         //참조는 클라우드 파일을 가리키는 포인터라고 할 수 있음.
-
         var storagrRef = storage?.reference?.child("profileImages")?.child(auth.currentUser?.email!!)?.child(imgFileName)
         storagrRef?.putFile(uri!!)?.addOnSuccessListener {
+            // 파이어스토어에 uri 저장하기
+            val firestoreRef = firestore.collection("users").document(auth.currentUser!!.email!!)
+            firestoreRef.update("uri", imgFileName)
+                .addOnSuccessListener {
+                    Log.d("로그", "Uri 업데이트 성공 - ProfileModifyActivity")
+
+                }.addOnFailureListener {
+                        e -> Log.w("로그", "Error updating document - ProfileModifyActivity", e)
+                }
             Toast.makeText(this, "ImageUploaded Success.", Toast.LENGTH_SHORT).show()
         }?.addOnFailureListener{
             Toast.makeText(this, "ImageUploaded Failed.", Toast.LENGTH_SHORT).show()
         }
-
-        // 파이어스토어에 uri 저장하기
-        val firestoreRef = firestore.collection("users").document(auth.currentUser!!.email!!)
-        firestoreRef.update("uri", imgFileName)
-            .addOnSuccessListener {
-                Log.d("로그", "Uri 업데이트 성공 - ProfileModifyActivity")
-
-            }.addOnFailureListener {
-                    e -> Log.w("로그", "Error updating document - ProfileModifyActivity", e)
-            }
-
     }
 
     fun getMyProfileImage(){

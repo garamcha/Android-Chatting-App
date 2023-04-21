@@ -16,7 +16,9 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
+        android:paddingBottom="10dp"
         android:id="@+id/chat_recy"
+        android:background="@color/light_purple"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize"
@@ -45,6 +47,7 @@
 
         <Button
             android:id="@+id/sendBtn"
+            android:background="@color/yellow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="전송" />
