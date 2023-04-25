@@ -33,9 +33,6 @@ class FriendFragment:Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var profileAdapter: ProfileAdapter
 
-
-    // 프로필 이미지 리스트
-    private  var imgList : ArrayList<Int> = arrayListOf(R.drawable.ic_friend)
     // 프로필 정보 리스트
     val dataList = ArrayList<ProfileData>()
     companion object{ // 정적으로 사용되는 부분이 object로 들어감
@@ -140,7 +137,7 @@ class FriendFragment:Fragment() {
         profileAdapter = ProfileAdapter(dataList)
         recyclerView.adapter = profileAdapter
 
-        // 리사이클러뷰 클릭 했을 때
+        // 리사이클러뷰 클릭 했을 때 프로필 디테일로 이동
         profileAdapter.setOnItemClickListener(object : ProfileAdapter.OnItemClickListener{
             override fun onClick(v: View, data: ProfileData, position: Int) {
                 // 클릭 시 실행할 행동 입력
@@ -220,7 +217,24 @@ class FriendFragment:Fragment() {
                 for(document in result){
                     firestore.collection("users").document(document.id).get()
                         .addOnSuccessListener { document ->
-                            dataList.add(ProfileData(document["uri"] as? String, document["userName"] as String, document["userEmail"] as String))
+                            val friendInfo = ProfileData(document["uri"] as? String, document["userName"] as String, document["userEmail"] as String)
+                            dataList.add(friendInfo)
+                            firestore.collection("users").document(auth.currentUser!!.email!!).collection("friendList")
+                                .document(document.id).update("img", document["uri"]).addOnCompleteListener {
+                                    if (it.isSuccessful){
+                                        Log.d("로그", "이미지 변경사항 친구목록에 업데이트 완료 - FriendFragment")
+                                    }else{
+                                        Log.d("로그", "이미지 변경사항 친구목록에 업데이트 실패 - FriendFragment")
+                                    }
+                                }
+                            firestore.collection("users").document(auth.currentUser!!.email!!).collection("friendList")
+                                .document(document.id).update("name", document["userName"]).addOnCompleteListener{
+                                    if (it.isSuccessful){
+                                        Log.d("로그", "아름 변경사항 친구목록에 업데이트 완료 - FriendFragment")
+                                    }else{
+                                        Log.d("로그", "아름 변경사항 친구목록에 업데이트 실패 - FriendFragment")
+                                    }
+                                }
                             Log.d(TAG,"파이어스토어에서 친구목록 가져오기 ${document["uri"] as? String}, ${document["userName"] as String}, ${document["userEmail"] as String}" )
                             profileAdapter.notifyDataSetChanged()
                         }.addOnFailureListener { exception ->

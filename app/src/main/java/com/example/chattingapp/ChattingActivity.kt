@@ -1,10 +1,8 @@
 package com.example.chattingapp
 
 import android.app.Activity
-import android.os.Build
+import android.os.*
 import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
-import android.os.Message
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -53,12 +51,11 @@ class ChattingActivity : AppCompatActivity() {
             youName = datas.name.toString()
             youEmail = datas.email.toString()
             Log.d("로그", "상대 사용자 정보 이름 가져오기 성공 - Chatting Activity")
-        }else{
+        }
+        else{
             Log.d("로그", "상대 사용자 정보 없음 - Chatting Activity")
             finish()
         }
-
-
 
         // 툴바 설정
         val toolbar = binding.chatToolbar
@@ -105,7 +102,9 @@ class ChattingActivity : AppCompatActivity() {
             }
 
         binding.sendBtn.setOnClickListener {
-            onClickSendBtn(datas)
+            Handler(Looper.getMainLooper()).postDelayed({
+                onClickSendBtn(datas)
+            }, 1000) // 1초 이하보다 많이 보내는 경우를 방지하기 위하여 추가
         }
     }
 
@@ -207,4 +206,5 @@ class ChattingActivity : AppCompatActivity() {
             activity.intent.getSerializableExtra(name) as ProfileData
 
     }
+
 }
