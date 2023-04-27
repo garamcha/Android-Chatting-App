@@ -5,15 +5,31 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <ImageView
-        android:id="@+id/chatting_profileImage"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:src="@drawable/ic_thumnail"
 
+    <LinearLayout
+        android:id="@+id/linearlayout3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="3dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/chatting_profileImage"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_thumnail"
+            app:civ_border_color="@color/yellow"
+            app:civ_border_width="3dp"
+            app:civ_circle_background_color="@color/main_purple"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </LinearLayout>
+
 
     <TextView
         android:id="@+id/message_tv"
@@ -26,11 +42,13 @@
         android:text="메세지가 나오는 부분"
         android:textColor="@color/black"
         android:textSize="15dp"
+        android:autoLink="web"
+        android:linksClickable="true"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constrainedWidth="true"
         app:layout_constraintEnd_toStartOf="@+id/time_tv"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/chatting_profileImage"
+        app:layout_constraintStart_toEndOf="@+id/linearlayout3"
         app:layout_constraintTop_toBottomOf="@+id/chat_name_tv" />
 
 

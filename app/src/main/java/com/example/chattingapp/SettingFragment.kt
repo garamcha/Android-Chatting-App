@@ -10,6 +10,10 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.chattingapp.databinding.FragmentSettingBinding
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -55,6 +59,14 @@ class SettingFragment:Fragment() {
         mBinding = FragmentSettingBinding.inflate(inflater, container, false)
         auth = Firebase.auth
 
+        //모바일 광고 SDK 초기화
+        MobileAds.initialize(requireContext()){}
+
+        // 광고 띄우기
+        val adRequest = AdRequest.Builder().build()
+        binding.adsBanner.loadAd(adRequest)
+
+
         // SharedPreference 객체 선언
         val auto : SharedPreferences = requireContext().getSharedPreferences("autoLogin", Context.MODE_PRIVATE)
 
@@ -62,10 +74,16 @@ class SettingFragment:Fragment() {
         val toolbar = binding.toolbar
         (activity as AppCompatActivity).setSupportActionBar(toolbar) // 내가 만든 툴바 사용
         toolbar.title = "설정"
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+        val googleSignInClient = GoogleSignIn.getClient(requireContext(), gso)
 
         binding.logouBtn.setOnClickListener {
             // 사용자 계정 로그아웃
             auth.signOut()
+            googleSignInClient.signOut()
             Log.d(TAG, "Logout Button Click. - SettingFragment")
             Toast.makeText(requireContext(), "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show()
             // 로그아웃 시 sharedPreference에 있는 데이터 삭제

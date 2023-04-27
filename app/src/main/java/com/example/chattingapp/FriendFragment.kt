@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -17,7 +18,9 @@ import com.bumptech.glide.Glide
 import com.example.chattingapp.databinding.FragmentFriendBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 
@@ -146,11 +149,43 @@ class FriendFragment:Fragment() {
 
         })
 
+        // 리사이클러뷰 롱 클릭 했을 때
+        profileAdapter.setOnItemLongClickListener(object : ProfileAdapter.OnItemLongClickListener{
+            override fun onLongClick(v: View, data: ProfileData, position: Int) {
+                // 팝업메뉴 띄우기
+                val popup = PopupMenu(requireContext(), v)
+                popup.menuInflater.inflate(R.menu.friend_manage_menu, popup.menu)
+                popup.show()
+                popup.setOnMenuItemClickListener{item ->
+                    when(item.itemId){
+                        R.id.friend_modify ->{
+                            Toast.makeText(requireContext(), "수정 클릭", Toast.LENGTH_SHORT).show()
+                            return@setOnMenuItemClickListener true
+                        }
+                        R.id.friend_delete -> {
+                            firestore.collection("users").document(auth.currentUser!!.email!!)
+                                .collection("friendList").document(data.email!!).delete()
+                                .addOnSuccessListener {result ->
+                                    Log.d("로그", "친구 삭제 성공 - FriendFragment")
+                                }.addOnFailureListener {
+                                    Log.d("로그", "친구 삭제 실패 - FriendFragment")
+                                }
+                            Toast.makeText(requireContext(), "친구 삭제 성공", Toast.LENGTH_SHORT).show()
+                            return@setOnMenuItemClickListener true
+                        }else ->{
+                            return@setOnMenuItemClickListener false
+                        }
+                    } // when(item.itemId)
+
+                } //  popup.setOnMenuItemClickListener
+            } // override fun onLongClick(v: View, position: Int)
+        })
+
         // 파이어스토어에서 친구목록 불러오기
         friendList()
+        profileAdapter.notifyDataSetChanged()
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
-        profileAdapter.notifyDataSetChanged()
         return binding.root
     }
 
@@ -210,15 +245,31 @@ class FriendFragment:Fragment() {
 
     // 친구 목록을 불러오는 함수
     private fun friendList(){
+        updateFriend()
         // 친구 목록 파이어스토어에서 불러오기
+        firestore.collection("users").document(auth.currentUser?.email!!).collection("friendList")
+            .orderBy("name").addSnapshotListener { friend, error ->
+                if(friend != null){
+                    for (dc in friend!!.documentChanges) {
+                        if (dc.type == DocumentChange.Type.ADDED){
+                            var friendInfo = dc.document.toObject(ProfileData::class.java)
+                            Log.d("로그", "친구 이름 순으로 가져오기 = $friendInfo - FriendFragment")
+                            dataList.add(friendInfo!!)
+                        }
+                    }
+                    profileAdapter.notifyDataSetChanged()
+                }
+            }
+    }
+
+    private fun updateFriend(){
         firestore.collection("users").document(auth.currentUser?.email!!)
             .collection("friendList").get()
             .addOnSuccessListener {result ->
                 for(document in result){
+                    // 친구 이미지, 이름 변경된거 가져오기
                     firestore.collection("users").document(document.id).get()
                         .addOnSuccessListener { document ->
-                            val friendInfo = ProfileData(document["uri"] as? String, document["userName"] as String, document["userEmail"] as String)
-                            dataList.add(friendInfo)
                             firestore.collection("users").document(auth.currentUser!!.email!!).collection("friendList")
                                 .document(document.id).update("img", document["uri"]).addOnCompleteListener {
                                     if (it.isSuccessful){
@@ -235,8 +286,6 @@ class FriendFragment:Fragment() {
                                         Log.d("로그", "아름 변경사항 친구목록에 업데이트 실패 - FriendFragment")
                                     }
                                 }
-                            Log.d(TAG,"파이어스토어에서 친구목록 가져오기 ${document["uri"] as? String}, ${document["userName"] as String}, ${document["userEmail"] as String}" )
-                            profileAdapter.notifyDataSetChanged()
                         }.addOnFailureListener { exception ->
                             Log.d(TAG, "Error getting documents: ", exception)
                         }
@@ -275,13 +324,10 @@ class FriendFragment:Fragment() {
                         val email = document["userEmail"] as String
                         val uri = document["uri"] as String?
                         if(name != null && email != null){
-                            dataList.add(ProfileData(uri, name, email))
-                            profileAdapter.notifyDataSetChanged()
                             // 친구추가 목록 파이어스토어에 저장하기
                             firestore?.collection("users")!!.document(auth.currentUser!!.email!!)
                                 .collection("friendList")!!.document(friendEmail).set(ProfileData(uri, name, email))
                             Toast.makeText(requireContext(), "친구추가 성공!!", Toast.LENGTH_SHORT).show()
-
                         }
                         else{
                             Toast.makeText(requireContext(), "존재하지 않는 친구입니다.", Toast.LENGTH_SHORT).show()

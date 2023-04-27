@@ -46,7 +46,7 @@ class ProfileDetailActivity : AppCompatActivity() {
         }
         if(datas != null){
             Log.d("로그", "프로필을 클릭 했을 때 intent로 넘어오는 데이터 = $datas - ProfileDetailActivity")
-            if(datas.img.equals(null)){
+            if(datas.img.equals(null) || datas.img == ""){
                 // 설정된 프로필 없을 경우 기본 이미지로 설정
                 binding.profileImg.setImageResource(R.drawable.ic_thumnail)
             }else{

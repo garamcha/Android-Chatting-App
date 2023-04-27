@@ -28,9 +28,11 @@ import java.util.*
 
 class ProfileModifyActivity : AppCompatActivity() {
     private lateinit var binding : ActivityProfileModifyBinding
-    private lateinit var auth: FirebaseAuth
+    private var auth: FirebaseAuth = Firebase.auth
     private lateinit var firestore : FirebaseFirestore
+    private var storage : FirebaseStorage? = FirebaseStorage.getInstance()
     private var uri : Uri? = null
+    var currentUserEmail = auth.currentUser?.email
 
     // 권한 요청
     private val requestMultiplePermission =
@@ -82,6 +84,7 @@ class ProfileModifyActivity : AppCompatActivity() {
                         // 확인 클릭 시 할 행동
                         // 파이어베이스 스토리지에 이미지 업로드
                         if(uri != null){
+                            deleteImageToFirebase()
                             uploadImageToFirebase(uri!!)
                         }
                         // 이름 변경 확인 후 적용하기
@@ -131,8 +134,30 @@ class ProfileModifyActivity : AppCompatActivity() {
         }
     }
 
+    // 이미지 삭제하는 함수
+    private fun deleteImageToFirebase(){
+        // 기존 이미지 명 가져오기
+        firestore = FirebaseFirestore.getInstance()
+        firestore.collection("users").document(currentUserEmail!!).get()
+            .addOnSuccessListener {
+                var info = it.toObject(UserData::class.java)
+                var img = info?.uri
+                Log.d("로그", "기존 프로필 이미지 주소 $img - ProfileModifyActivity")
+                if(img != null && img.length > 0){
+                    storage?.reference?.child("profileImages/${currentUserEmail}/$img")?.delete()
+                        ?.addOnSuccessListener {
+                            Log.d("로그", "기존 프로필 이미지 삭제 완료 - ProfileModifyActivity")
+                        }
+                        ?.addOnFailureListener {
+                            Log.d("로그", "기존 프로필 이미지 삭제 실패 - ProfileModifyActivity")
+                        }
+                }else{
+                    Log.d("로그", "삭제할 이미지 없음 - ProfileModifyActivity")
+                }
+            }
+    }
+
     fun uploadImageToFirebase(uri : Uri){
-        var storage : FirebaseStorage? = FirebaseStorage.getInstance() //FirebaseStorage 인스턴스 생성
         // 스토리지에 저장될 파일 명
         var timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
         var imgFileName = "IMAGE_" + timeStamp + "_.jpg"
@@ -156,9 +181,7 @@ class ProfileModifyActivity : AppCompatActivity() {
     }
 
     fun getMyProfileImage(){
-        var storage : FirebaseStorage? = FirebaseStorage.getInstance() //FirebaseStorage 인스턴스 생성
         var storageRef = storage?.reference
-        var currentUserEmail = auth.currentUser?.email
 
         firestore.collection("users").document(currentUserEmail!!).get()
             .addOnSuccessListener {document ->

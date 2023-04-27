@@ -17,18 +17,16 @@
         android:layout_marginVertical="10dp">
 
 
-        <ImageView
+        <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/profile_image"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:layout_marginStart="4dp"
             android:src="@drawable/ic_thumnail"
-            android:background="@color/main_purple"
-            android:layout_margin="5dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0" />
+            android:scaleType="centerCrop"
+            app:civ_border_color="@color/yellow"
+            app:civ_border_width="3dp"
+            app:civ_circle_background_color="@color/main_purple"
+            />
 
 
         <TextView

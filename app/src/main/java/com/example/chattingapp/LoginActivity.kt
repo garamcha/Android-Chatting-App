@@ -7,13 +7,24 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import com.example.chattingapp.databinding.ActivityLoginBinding
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlin.math.sign
 
 class LoginActivity : AppCompatActivity() {
     // ViewBinding 사용을 위한 변수 선언
@@ -22,8 +33,12 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var auth : FirebaseAuth
     private var userName : String? = null
 
+    // Firestore 의 객체 선언
     private var firestore: FirebaseFirestore? = null
     private var uid : String? = null
+
+    // 구글 로그인 연동에 필요한 변수
+    private lateinit var launcher: ActivityResultLauncher<Intent>
     private companion object {
         const val TAG = "로그"
     }
@@ -43,6 +58,78 @@ class LoginActivity : AppCompatActivity() {
         // onCreate() 메서드에서 FirebaseAuth 인스턴스를 초기화
         auth = Firebase.auth
         firestore = FirebaseFirestore.getInstance()
+
+        // 구글 로그인
+        launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()
+        , ActivityResultCallback {result ->
+                Log.d(TAG, "resultCode : ${result.resultCode}")
+                Log.d(TAG, "result : $result")
+
+                if(result.resultCode == RESULT_OK){
+                    Log.d(TAG, "resultCode : ${result.resultCode}")
+                    Log.d(TAG, "result : $result")
+                    val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+                    try{
+                        task.getResult(ApiException::class.java)?.let{account->
+                            var tokenId = account.idToken
+                            if(tokenId != null && tokenId != ""){
+                                val credential : AuthCredential = GoogleAuthProvider.getCredential(account.idToken, null)
+                                auth.signInWithCredential(credential).addOnCompleteListener {
+                                    if(auth.currentUser != null){
+                                        val user : FirebaseUser = auth.currentUser!!
+                                        var email = user.email.toString()
+                                        Log.d("로그", "email : $email")
+                                        val googleSignInToken = account.idToken ?: ""
+                                        if(googleSignInToken != ""){
+                                            Log.d(TAG, "googleSignInToken : $googleSignInToken")
+                                        } else {
+                                            Log.d(TAG, "googleSignInToken이 null")
+                                        } // else
+                                        if(it.isSuccessful){
+                                            user?.let {
+                                                for(profile in it.providerData){
+                                                    Log.d("로그", "$profile : providerData - LoginActivty")
+                                                    Log.d("로그", "${profile.uid} : profile.uid - LoginActivty")
+                                                    Log.d("로그", "${profile.displayName} : profile.displayName - LoginActivty")
+                                                    Log.d("로그", "${profile.photoUrl} : profile.photoUrl - LoginActivty")
+                                                    Log.d("로그", "${profile.phoneNumber} :profile.phoneNumber - LoginActivty")
+                                                    val name = profile.displayName as String
+                                                    val phone = profile.phoneNumber as? String
+                                                    // 파이어스토어에 저장. 근데 위치가 잘못되었으나 어디에다가 작성해야할지 고민이다.
+                                                    firestore!!.collection("users").document(email).set(UserData(name, "", email, user.uid, phone))
+                                                        .addOnSuccessListener { 
+                                                            Log.d("로그", "구글 로그인 파이어스토어 저장 성공 - LoginActivty")
+                                                        }.addOnFailureListener {
+                                                            Log.d("로그", "구글 로그인 파이어스토어 저장 실패 - LoginActivty")
+                                                        }
+                                                }
+                                            }
+                                            moveMainPage(it.result?.user)
+                                        }
+                                    } // if(auth.currentUser != null)
+                                } // .addOnCompleteListener
+                            }// if(tokenId != null && tokenId != "")
+                        } ?: throw Exception() // let
+                    } catch (e : Exception){
+                        e.printStackTrace()
+                    }
+                } // if(result.resultCode == RESULT_OK)
+            })
+
+        // 구글 로그인 버튼 클릭 시
+        binding.run {
+            googleSignInBtn.setOnClickListener {
+                CoroutineScope(Dispatchers.IO).launch {
+                    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestIdToken(getString(R.string.default_web_client_id))
+                        .requestEmail()
+                        .build()
+                    val googleSignInClient = GoogleSignIn.getClient(this@LoginActivity, gso)
+                    val signInIntent : Intent = googleSignInClient.signInIntent
+                    launcher.launch(signInIntent)
+                }
+            }
+        }
 
         /**자동로그인**/
         val autoEmail = auto.getString("userEmail", null)
@@ -121,11 +208,18 @@ class LoginActivity : AppCompatActivity() {
             startActivity(intent)
         }
     }
+
     // Handler 구현
     inner class ExceptionHandler : Thread.UncaughtExceptionHandler{
         override fun uncaughtException(p0: Thread, p1: Throwable) {
+            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build()
+            val googleSignInClient = GoogleSignIn.getClient(this@LoginActivity, gso)
             // 앱이 비정상적으로 종료 되었을 경우 로그아웃
             auth?.signOut()
+            googleSignInClient.signOut()
             // SharedPreference 객체 선언
             val auto : SharedPreferences = getSharedPreferences("autoLogin", Context.MODE_PRIVATE)
             val logoutbtn : SharedPreferences.Editor = auto.edit()

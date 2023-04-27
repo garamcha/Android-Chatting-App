@@ -14,13 +14,22 @@ import com.google.firebase.storage.FirebaseStorage
 
 class ProfileAdapter(private var items: ArrayList<ProfileData>) : RecyclerView.Adapter<ProfileAdapter.ViewHolder>() {
     private var listener: OnItemClickListener? = null
+    private var longListener : OnItemLongClickListener? = null
 
     interface OnItemClickListener {
         fun onClick(v: View, data: ProfileData, position: Int)
     }
 
+    interface OnItemLongClickListener{
+        fun onLongClick(v : View, data: ProfileData, position: Int)
+    }
+
     fun setOnItemClickListener(listener: OnItemClickListener) {
         this.listener = listener
+    }
+
+    fun setOnItemLongClickListener(longListener : OnItemLongClickListener){
+        this.longListener = longListener
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -52,6 +61,10 @@ class ProfileAdapter(private var items: ArrayList<ProfileData>) : RecyclerView.A
             if (pos != RecyclerView.NO_POSITION) {
                 itemView.setOnClickListener {
                     listener?.onClick(itemView, item, pos)
+                }
+                itemView.setOnLongClickListener {
+                    longListener?.onLongClick(itemView,item,  pos)
+                    return@setOnLongClickListener true
                 }
             }
         }
