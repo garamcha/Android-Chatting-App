@@ -31,6 +31,8 @@ class ListFragment:Fragment() {
     var firestore = FirebaseFirestore.getInstance()
     var currentUsers = FirebaseAuth.getInstance().currentUser?.email
 
+    private var clear : Boolean = false
+    private var count : Short = 0
     // 채팅 목록 배열 선언
     private var chatList = ArrayList<ListData>()
 
@@ -57,72 +59,11 @@ class ListFragment:Fragment() {
         Log.d(TAG,"ListFragment - onAttach() called")
     }
 
-    // View가 생성되었을 때 - 화면(Fragment)과 레이아웃을 연결
-   override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // 액티비티 와는 다르게 layoutInflater 를 쓰지 않고 inflater 인자를 가져와 뷰와 연결한다.
-        Log.d(TAG, "ListFragment - onCreateView() called")
-        mBinding = FragmentListBinding.inflate(inflater, container, false)
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "ListFragment - OnResume() called")
 
-        //1. 툴바 사용 설정
-        val toolbar = binding.toolbar
-        (activity as AppCompatActivity).setSupportActionBar(toolbar) // 내가 만든 툴바 사용
-        toolbar.title = "채팅방"
-
-
-        // 파이어 스토어에서 마지막 대화목록 가져오기
-        firestore.collection("users").document(currentUsers.toString())
-            .collection("friendList").get()
-            .addOnSuccessListener {result ->
-                for(document in result){
-                    var youName = document["name"] as String
-                    var youImg : String? = null
-                    if(document["img"] == null){
-                        youImg = ""
-                    }else{
-                        youImg = document["img"] as String
-                    }
-
-                    var youEmail = document.id
-
-                    var firestoreRef = firestore.collection("users").document(currentUsers.toString())
-                        .collection("friendList").document(youEmail).collection("message")
-
-                    firestoreRef.get().addOnSuccessListener {
-                        firestoreRef.orderBy("date", Query.Direction.DESCENDING).limit(1)
-                            .addSnapshotListener{ querySnapshot, firebaseFirestoreException ->
-                                if(querySnapshot == null){
-                                    Log.d("로그", "대화 내용 없음 - ListFragment")
-                                }else{
-                                    for (dc in querySnapshot!!.documentChanges) {
-                                        // firebase에 추가된 메세지 마지막 메세지를 가져오기
-                                        if (dc.type == DocumentChange.Type.ADDED) {
-                                            var firebaseMessage =
-                                                dc.document.toObject(MessageData::class.java)
-                                            chatList.add(
-                                                ListData(youName, firebaseMessage.message, firebaseMessage.date, youImg, youEmail)
-                                            )
-                                            listAdapter.notifyDataSetChanged()
-
-                                        }
-                                    }
-                                }
-                            }
-                    }.addOnFailureListener {
-                        Log.d("로그", "대화 내용 없음 - ListFragment")
-                    }
-
-
-                    Log.d("로그", "${document.id} - ListFragment")
-                }
-
-            }.addOnFailureListener {
-                Log.d("로그", "친구목록 접근 실패 - ListFragment")
-            }
-
+        getLastMessage() //마지막 대화 내용 가져오기
 
         // recyclerView 연결하기
         recyclerView = binding.listRecy
@@ -140,6 +81,23 @@ class ListFragment:Fragment() {
                 }.run { startActivity(this) }
             }
         })
+
+    }
+
+    // View가 생성되었을 때 - 화면(Fragment)과 레이아웃을 연결
+   override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // 액티비티 와는 다르게 layoutInflater 를 쓰지 않고 inflater 인자를 가져와 뷰와 연결한다.
+        Log.d(TAG, "ListFragment - onCreateView() called")
+        mBinding = FragmentListBinding.inflate(inflater, container, false)
+
+        //1. 툴바 사용 설정
+        val toolbar = binding.toolbar
+        (activity as AppCompatActivity).setSupportActionBar(toolbar) // 내가 만든 툴바 사용
+        toolbar.title = "채팅방"
 
         return binding.root
 
@@ -178,6 +136,69 @@ class ListFragment:Fragment() {
                 //PorterDuff.Mode.SRC_ATOP은 기존 색상과 새로운 색상을 합칠 때, 새로운 색상이 기존 색상을 덮어쓰는 모드
             }
         }
+    }
+
+    private fun getLastMessage(){
+        chatList.clear()
+        /** 파이어 스토어에서 마지막 대화목록 가져오기 **/
+        // 친구목록 가져오기
+        firestore.collection("users").document(currentUsers.toString())
+            .collection("friendList").get()
+            .addOnSuccessListener {result ->
+                for(document in result){
+                    Log.d("로그", "상대 이름: ${document["name"]} - ListFragment")
+                    var youName = document["name"] as String
+                    var youImg : String? = null
+                    if(document["img"] == "" || document["img"] == null){
+                        youImg = null
+                    }else{
+                        youImg = document["img"] as String
+                    }
+
+                    var youEmail = document.id
+
+                    var firestoreRef = firestore.collection("users").document(currentUsers.toString())
+                        .collection("friendList").document(youEmail).collection("message")
+
+                    firestoreRef.get().addOnSuccessListener {
+                        firestoreRef.orderBy("date", Query.Direction.DESCENDING).limit(1)
+                            .addSnapshotListener{ querySnapshot, firebaseFirestoreException ->
+                                Log.d("로그", "상대 이름: ${document["name"]} - ListFragment")
+                                if(querySnapshot == null){
+                                    Log.d("로그", "대화 내용 없음 - ListFragment")
+                                }else{
+                                    for (dc in querySnapshot!!.documentChanges) {
+                                        // firebase에 추가된 메세지 마지막 메세지를 가져오기
+                                        if (dc.type == DocumentChange.Type.ADDED) {
+                                            var firebaseMessage =
+                                                dc.document.toObject(MessageData::class.java)
+                                            // 기존에 있던 마지막 메세지 삭제
+                                            chatList.add(
+                                                ListData(youName, firebaseMessage.message, firebaseMessage.date, youImg, youEmail)
+                                            )
+                                            listAdapter.notifyDataSetChanged()
+
+                                            if(chatList != null && chatList.size != 0){
+                                                for(i in chatList){
+                                                    Log.d("로그", "마지막 채팅 내용 읽어 오기 ${i} - ListFragment")
+                                                    Log.d("로그", "마지막 채팅 내용 읽어 오기 ${chatList.size} - ListFragment")
+                                                }
+                                            }
+
+
+                                        } // if (dc.type == DocumentChange.Type.ADDED)
+                                    } // for (dc in querySnapshot!!.documentChanges)
+                                } // else
+                            }
+                    }.addOnFailureListener {
+                        Log.d("로그", "대화 내용 없음 - ListFragment")
+                    }
+                    Log.d("로그", "${document.id} - ListFragment")
+                }
+
+            }.addOnFailureListener {
+                Log.d("로그", "친구목록 접근 실패 - ListFragment")
+            }
     }
 
     /* Fragment에서 View Binding을 사용할 경우 Fragment는 View보다 오래 지속되어,

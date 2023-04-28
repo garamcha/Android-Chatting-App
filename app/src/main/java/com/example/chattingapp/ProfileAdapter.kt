@@ -43,7 +43,7 @@ class ProfileAdapter(private var items: ArrayList<ProfileData>) : RecyclerView.A
             var storage : FirebaseStorage? = FirebaseStorage.getInstance() //FirebaseStorage 인스턴스 생성
             var storageRef = storage?.reference
 
-            if(fileName.equals(null) || fileName?.length == 0){
+            if(fileName.equals(null)){
                 userImg.setImageResource(R.drawable.ic_thumnail)
                 Log.d("로그", "친구 프로필 이미지 기본으로 설정 - ProfileAdapter")
             }else{

@@ -36,6 +36,7 @@ class MessageAdapter(var context: Context, var currentUser : String,
             time_tv.text = time.format(formatter2)
 
             var firestore = FirebaseFirestore.getInstance()
+            Log.d("로그", "${message.email} - message.email - MessageAdpater")
             // 파이어 스토어에서 사용자 이름 가져오기
             firestore.collection("users").document(message.email).get()
                 .addOnSuccessListener {
@@ -45,11 +46,16 @@ class MessageAdapter(var context: Context, var currentUser : String,
 
                     storageRef?.child("profileImages/${message.email}/${user?.uri}")?.downloadUrl
                         ?.addOnSuccessListener {uri ->
-                            Log.d("로그", "내프로필 파이어 스토어에서 이미지 파일 가져오기 성공 - FriendFragment")
-                            Glide.with(context).load(uri).into(profile_img)
+                            if(uri == null){
+                                profile_img.setImageResource(R.drawable.ic_thumnail)
+                            }else{
+                                Log.d("로그", "내프로필 파이어 스토어에서 이미지 파일 가져오기 성공 - MessageAdapter")
+                                Glide.with(context).load(uri).into(profile_img)
+                            }
 
                         }?.addOnFailureListener {
-                            Log.d("로그", "내프로필 파이어 스토어에서 이미지 파일 가져오기 실패 - FriendFragment")
+                            profile_img.setImageResource(R.drawable.ic_thumnail)
+                            Log.d("로그", "내프로필 파이어 스토어에서 이미지 파일 가져오기 실패 - MessageAdapter")
                         }
                     u_name_tv.text = user?.userName
                     if(currentUser != message.email){

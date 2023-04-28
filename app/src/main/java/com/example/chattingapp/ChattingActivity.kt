@@ -35,7 +35,6 @@ class ChattingActivity : AppCompatActivity() {
     private lateinit var messageAdapter: MessageAdapter
 
     private lateinit var youName : String
-    private var youImg : String? = null
     private lateinit var youEmail : String
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -120,23 +119,6 @@ class ChattingActivity : AppCompatActivity() {
         val formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss")
         var time = timestamp.format(formatter)
 
-        // Firebase 서버 시간 가져오기
-        /*val timestampServer = FieldValue.serverTimestamp() // 존나 이상하게 뜸
-        val ref = firestore.collection("users").document(currentUser!!)
-            .collection("friendList").document(youEmail).collection("message").document()
-        ref.addSnapshotListener{ snapshot, e ->
-            if(e != null){
-                Log.d("로그", "Listen Failed", e)
-            }
-
-            if (snapshot != null && snapshot.exists()) {
-                Log.d("로그", "Current data: ${snapshot.data}")
-            } else {
-                Log.d("로그", "Current data: null")
-                firebase.firestore.Timestamp.now()
-            }
-
-        }*/
 
 
         var myName : String = ""

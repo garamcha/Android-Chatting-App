@@ -96,7 +96,7 @@ class LoginActivity : AppCompatActivity() {
                                                     val name = profile.displayName as String
                                                     val phone = profile.phoneNumber as? String
                                                     // 파이어스토어에 저장. 근데 위치가 잘못되었으나 어디에다가 작성해야할지 고민이다.
-                                                    firestore!!.collection("users").document(email).set(UserData(name, "", email, user.uid, phone))
+                                                    firestore!!.collection("users").document(email).set(UserData(name, null, email, user.uid, phone))
                                                         .addOnSuccessListener { 
                                                             Log.d("로그", "구글 로그인 파이어스토어 저장 성공 - LoginActivty")
                                                         }.addOnFailureListener {

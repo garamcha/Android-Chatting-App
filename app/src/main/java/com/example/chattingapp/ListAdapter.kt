@@ -46,7 +46,7 @@ class ListAdapter (var context: Context, var chatList:ArrayList<ListData>)
             var storage : FirebaseStorage? = FirebaseStorage.getInstance() //FirebaseStorage 인스턴스 생성
             var storageRef = storage?.reference
 
-            if(list.img.length == 0 && list.img == ""){
+            if(list.img == null || list.img == ""){
                 other_person_img.setImageResource(R.drawable.ic_thumnail)
             }else{
                 storageRef?.child("profileImages/${list.email}/${list.img}")?.downloadUrl

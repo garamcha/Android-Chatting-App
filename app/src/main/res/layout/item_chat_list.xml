@@ -23,7 +23,7 @@
             android:id="@+id/list_img"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:src="@drawable/ic_friend"
+            android:src="@drawable/ic_thumnail"
             android:layout_marginRight="20dp"
             android:scaleType="centerCrop"
             app:layout_constraintBottom_toBottomOf="parent"
