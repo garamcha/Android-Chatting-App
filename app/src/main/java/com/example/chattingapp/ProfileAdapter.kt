@@ -57,6 +57,7 @@ class ProfileAdapter(private var items: ArrayList<ProfileData>) : RecyclerView.A
                     }
             }
 
+
             val pos = adapterPosition
             if (pos != RecyclerView.NO_POSITION) {
                 itemView.setOnClickListener {

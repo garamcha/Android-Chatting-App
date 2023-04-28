@@ -178,13 +178,12 @@ class ListFragment:Fragment() {
                                             )
                                             listAdapter.notifyDataSetChanged()
 
-                                            if(chatList != null && chatList.size != 0){
+                                            /*if(chatList != null && chatList.size != 0){
                                                 for(i in chatList){
                                                     Log.d("로그", "마지막 채팅 내용 읽어 오기 ${i} - ListFragment")
                                                     Log.d("로그", "마지막 채팅 내용 읽어 오기 ${chatList.size} - ListFragment")
                                                 }
-                                            }
-
+                                            }*/
 
                                         } // if (dc.type == DocumentChange.Type.ADDED)
                                     } // for (dc in querySnapshot!!.documentChanges)
